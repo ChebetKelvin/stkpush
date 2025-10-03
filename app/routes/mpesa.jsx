@@ -11,7 +11,7 @@ export async function action({ request }) {
   if (!stk) return data({ status: "ignored" });
 
   let { ResultCode, ResultDesc, CallbackMetadata, CheckoutRequestID } = stk;
-  let checkoutId = CheckoutRequestID || stk.CheckoutRequestID;
+  let checkoutId = stk.CheckoutRequestID;
 
   let phone, amount, receipt, txDate;
   if (CallbackMetadata?.Item) {

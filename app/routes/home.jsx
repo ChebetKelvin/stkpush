@@ -1,7 +1,6 @@
 import { Form, redirect } from "react-router"; // Fixed import
 import { stkPush, normalizePhone } from "../.server/stkpush";
 import { getSession, commitSession } from "../.server/session";
-import { addPayments } from "../model/payment";
 
 export async function action({ request }) {
   let session = await getSession(request.headers.get("Cookie"));
@@ -9,7 +8,11 @@ export async function action({ request }) {
   let phone = normalizePhone(formData.get("phone"));
   let amount = formData.get("amount");
 
-  let safResonse = await stkPush({ phone, amount }); // Moved inside function
+  console.log("Processing payment for phone:", phone, "amount:", amount);
+
+  let safResonse = await stkPush({ phone, amount });
+
+  if (!safResonse) return redirect("/home");
 
   if (safResonse.errorCode) return redirect("/home");
 
@@ -17,18 +20,9 @@ export async function action({ request }) {
   session.set("amount", amount);
   session.set("checkoutId", safResonse.CheckoutRequestID);
 
-  // Optionally add payment record
-  await addPayments({
-    phone,
-    amount,
-    checkoutId: safResonse.CheckoutRequestID,
-    createdAt: new Date(),
-    status: "pending",
-  });
-
   return redirect("/success", {
     headers: {
-      "Set-Cookie": await commitSession(session), // Fixed commitSession usage
+      "Set-Cookie": await commitSession(session),
     },
   });
 }
@@ -62,7 +56,7 @@ export default function onlinePayment() {
             name="amount"
             required
             placeholder="Enter amount"
-            className="px-2 py-1 border border-gray-300 text-black rounded mb-4 w-full"
+            className="px-2 py-1 border border-gray-300 rounded mb-4 w-full"
           />
 
           <button

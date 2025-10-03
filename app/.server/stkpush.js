@@ -9,6 +9,8 @@ export async function stkPush({ phone, amount }) {
     "base64"
   );
 
+  console.log({ password, shortcode, passkey, timestamp });
+
   let payload = {
     BusinessShortCode: shortcode,
     Password: password,
@@ -22,6 +24,8 @@ export async function stkPush({ phone, amount }) {
     AccountReference: `Order${timestamp}`,
     TransactionDesc: "Payment Test",
   };
+
+  console.log("STK Push payload:", JSON.stringify(payload, null, 2));
 
   let token = await getMpesaToken();
 
